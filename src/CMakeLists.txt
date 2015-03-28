@@ -1,0 +1,9 @@
+set(SOURCES main.c)
+
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+if (NOT DEFINED CMAKE_MACOSX_RPATH)
+	set(CMAKE_MACOSX_RPATH 0)
+endif()
+
+add_executable(7e0bhttpd ${SOURCES})
