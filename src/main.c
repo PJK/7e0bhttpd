@@ -1,7 +1,9 @@
+#include <string.h>
 #include <stdio.h>
 
-int main(int argc, char * argv[])
+
+int main( int argc, char **argv )
 {
-	printf("Hello world");
+	parse(arvg[1]);
 	return 0;
 }
