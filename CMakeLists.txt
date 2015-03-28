@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 2.8)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 project(7e0bhttpd)
 include(CTest)
+find_package(RAGEL 6.6 REQUIRED)
+
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -Wall -pedantic -g -ggdb -fprofile-arcs -ftest-coverage -DDEBUG=true")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -Wall -pedantic -DNDEBUG")
