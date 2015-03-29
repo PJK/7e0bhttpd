@@ -21,7 +21,7 @@
                 'PATCH'     @{ req.verb = PATCH; }
            );
 
-    header_value = (any - cntrl - space)+;
+    header_value = (any - cntrl - [\n\r])*;
 
     path = ('/' . header_value?)   >{ MARK(); /* allow '/' */ }
                                    %{ CAPTURE(req.path); };
