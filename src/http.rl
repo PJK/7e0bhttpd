@@ -23,8 +23,8 @@
 
     header_value = (any - cntrl - space)+;
 
-    path = ('/' . header_value)   >{ MARK(); }
-                                  %{ CAPTURE(req.path); };
+    path = ('/' . header_value?)   >{ MARK(); /* allow '/' */ }
+                                   %{ CAPTURE(req.path); };
 
     req_head = verb  ' '  path  ' HTTP/1.1';
 
@@ -49,11 +49,13 @@
                 header_value    >{ MARK(); }
                                 %{ CAPTURE(header); printf("%s'\n", header); };
 
-    header_line =   (header newline) > 1 |
-                    connection_line > 2;
+    generic_header_line = header newline;
+
+    header_line =   generic_header_line     > 1 |
+                    host_line               > 2 |
+                    connection_line         > 2;
 
     main := (req_head newline
-             host_line
              header_line*)  %eof{ success = true; printf("DONE\n"); }
                             $err { printf("Parse error near character %d (line %d)\n", p - data, line); };
 

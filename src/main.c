@@ -56,15 +56,28 @@ int main( int argc, char **argv )
 
 	listen(listen_sd, 0);
 
-	struct sockaddr_storage client_addr;
-	socklen_t addr_len = sizeof(client_addr);
-	char numeric_addr[INET6_ADDRSTRLEN];
-	int fd = accept(listen_sd, (struct sockaddr*)&client_addr, &addr_len);
-	if (fd < 0)
-		perror("accept()");
-	if(client_addr.ss_family == AF_INET)
-		printf("New client from %s\n",inet_ntop(client_addr.ss_family,((struct sockaddr_in*)&client_addr)->sin_addr.s_addr ,numeric_addr,sizeof numeric_addr));
-	else if(client_addr.ss_family == AF_INET6)
-		printf("New client from %s\n",inet_ntop(client_addr.ss_family,&((struct sockaddr_in6*)&client_addr)->sin6_addr, numeric_addr,sizeof numeric_addr));
+	while (true) {
+		struct sockaddr_storage client_addr;
+		socklen_t addr_len = sizeof(client_addr);
+		char numeric_addr[INET6_ADDRSTRLEN];
+		int fd = accept(listen_sd, (struct sockaddr *) &client_addr, &addr_len);
+		if (fd < 0)
+			perror("accept()");
+		if (client_addr.ss_family == AF_INET)
+			printf("New client from %s\n",
+				   inet_ntop(client_addr.ss_family, ((struct sockaddr_in *) &client_addr)->sin_addr.s_addr,
+							 numeric_addr, sizeof numeric_addr));
+		else if (client_addr.ss_family == AF_INET6)
+			printf("New client from %s\n",
+				   inet_ntop(client_addr.ss_family, &((struct sockaddr_in6 *) &client_addr)->sin6_addr, numeric_addr,
+							 sizeof numeric_addr));
+
+		int len = 0;
+		char buffer[4096];
+		bzero(buffer, 4096);
+		len = read(fd, buffer, 4096);
+		printf("Raad %d:\n %s", len, buffer);
+		parse(buffer);
+	}
 	close(listen_sd);
 }
