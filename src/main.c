@@ -56,6 +56,7 @@ int main( int argc, char **argv )
 
 	listen(listen_sd, 0);
 
+	char * response = "HTTP/1.1 404 Not Found\r\n";
 	while (true) {
 		struct sockaddr_storage client_addr;
 		socklen_t addr_len = sizeof(client_addr);
@@ -76,7 +77,11 @@ int main( int argc, char **argv )
 		char buffer[4096];
 		bzero(buffer, 4096);
 		len = read(fd, buffer, 4096);
-		printf("Raad %d:\n %s", len, buffer);
+		printf("Read %d:\n %s", len, buffer);
+		write(fd, response, 24);
+		write(fd, "Content-Length: 8\r\n\r\n", 21);
+		write(fd, "Too bad\n", 8);
+		close(fd);
 		parse(buffer);
 	}
 	close(listen_sd);

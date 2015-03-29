@@ -28,9 +28,8 @@
 
     req_head = verb  ' '  path  ' HTTP/1.1';
 
-    host = 'Host: ' . header_value    >{ /* virtual hosts not implemented */ };
-
-    host_line = host newline;
+    host = 'Host: ' . header_value      >{ MARK(); /* virtual hosts not implemented */ }
+                                        %{ CAPTURE(header); printf("Host: %s\n", header); };
 
     connection_values = (
                             'keep-alive' @{ req.connection = KEEPALIVE; } |
@@ -38,8 +37,6 @@
                         );
 
     connection = 'Connection: ' connection_values;
-
-    connection_line = connection newline;
 
     generic_header = (alnum | '_' | '-')+;
 
@@ -49,15 +46,15 @@
                 header_value    >{ MARK(); }
                                 %{ CAPTURE(header); printf("%s'\n", header); };
 
-    generic_header_line = header newline;
-
-    header_line =   generic_header_line     > 1 |
-                    host_line               > 2 |
-                    connection_line         > 2;
+    header_line =   header             > 1 |
+                    host               > 2 |
+                    connection         > 2;
 
     main := (req_head newline
-             header_line*)  %eof{ success = true; printf("DONE\n"); }
-                            $err { printf("Parse error near character %d (line %d)\n", p - data, line); };
+             (header_line newline)*
+             newline?
+            )                           %eof{ success = true; printf("DONE\n"); }
+                                        $err { printf("Parse error near character %d (line %d)\n", p - data, line); };
 
 }%%
 
@@ -72,7 +69,7 @@ void print_request(const struct http_request req)
 
 #define MARK() { string_start = p; } while (0)
 // TODO handle overflows
-#define CAPTURE(buffer) { strncpy(buffer, string_start, p - string_start); } while (0)
+#define CAPTURE(buffer) { bzero(header, 128); strncpy(buffer, string_start, p - string_start); } while (0)
 
 int parse(char * data) {
     int cs = 0, line = 0;
