@@ -54,7 +54,7 @@ int main( int argc, char **argv )
 		exit(-1);
 	}
 
-	listen(listen_sd, 0);
+	listen(listen_sd, 4096);
 
 	char * response = "HTTP/1.1 404 Not Found\r\n";
 	while (true) {

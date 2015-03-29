@@ -7,7 +7,7 @@
 %%{
     machine http;
 
-    newline = '\r\n' @{ line++; };
+    newline = '\r\n' @{ line++; line_chars = p; };
 
     verb = (
                 'GET'       @{ req.verb = GET; }        |
@@ -46,15 +46,15 @@
                 header_value    >{ MARK(); }
                                 %{ CAPTURE(header); printf("%s'\n", header); };
 
-    header_line =   header             > 1 |
-                    host               > 2 |
-                    connection         > 2;
+    header_line =   header              |
+                    host                |
+                    connection         ;
 
     main := (req_head newline
              (header_line newline)*
              newline?
             )                           %eof{ success = true; printf("DONE\n"); }
-                                        $err { printf("Parse error near character %d (line %d)\n", p - data, line); };
+                                        $err { printf("Parse error near %d:%d. State: %d\n", line, p - line_chars, cs); };
 
 }%%
 
@@ -72,8 +72,8 @@ void print_request(const struct http_request req)
 #define CAPTURE(buffer) { bzero(header, 128); strncpy(buffer, string_start, p - string_start); } while (0)
 
 int parse(char * data) {
-    int cs = 0, line = 0;
     char *p = data, *string_start;
+    int cs = 0, line = 1, line_chars = p;
     char *pe = p + strlen(p);
     char *eof = pe;
     bool success = false;
